@@ -22,7 +22,7 @@ proposed model.
 
 
 ## Usage
-You can directly run the model files TFCformer.py and TFCformer_2b.py. We will update the descriptions for this project shortly after our paper is accepted.
+You can directly run the model files TFCformer.py and TFCformer_2b.py. We will update the descriptions for this project shortly after our paper is online.
 
 
 
