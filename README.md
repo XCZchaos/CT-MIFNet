@@ -42,14 +42,17 @@ CT-MIFNet/
 
 1.prcessing file  
 - Execute BCI_2a_getData.m in Matlab to extract and preprocess the 2a dataset.
-- Execute BCI_2a_getData_2b.m in Matlab to extract and preprocess the 2b dataset.  
+- Execute BCI_2a_getData_2b.m in Matlab to extract and preprocess the 2b dataset.
+
 2.commom_spatial_pattern.py and commom_spatial_pattern_2b.py.
-- Script for implementing multi-class CSP.  
+- Script for implementing multi-class CSP.
+  
 3. config.py and config_2b.py
 A centralized file for managing global configurations, including:
 - Parameter settings for the dataset (e.g. number of channels, time points, sampling frequency)
 - Model hyperparameters (e.g., embedding dimensions, attention heads).
-- Training parameters (e.g., batch size, epochs, learning rate，num_class).  
+- Training parameters (e.g., batch size, epochs, learning rate，num_class).
+
 4.CT_MIFNet.py and CT_MIFNet_2b.py.
 Contains three main modules: CT_MIFNet(), Trans() and main().
 - CT_MIFNet() is the core implementation of the model.
@@ -66,9 +69,9 @@ CT_MIFNet supports two EEG datasets and one Pain Percept dataset. Below are the 
 2.BCI Competition IV dataset 2b  
 - Model Initialization：CT_MIFNet()
 - Key Parameters: classes=2
-3.EDLEP dataset  
+3.EDLEP dataset
 
-
+---
 
 
 ## **Usage**
