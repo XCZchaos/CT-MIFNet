@@ -44,20 +44,20 @@ CT-MIFNet/
 - Execute ```BCI_2a_getData.m``` in Matlab to extract and preprocess the 2a dataset.
 - Execute ```BCI_2a_getData_2b.m``` in Matlab to extract and preprocess the 2b dataset.
 
-### 2.```commom_spatial_pattern.py``` and ```commom_spatial_pattern_2b.py```.
+### 2.```commom_spatial_pattern.py``` and ```commom_spatial_pattern_2b.py```
 - Script for implementing multi-class CSP.
   
 ### 3. ```config.py``` and ```config_2b.py```
 A centralized file for managing global configurations, including:
-- Parameter settings for the dataset (e.g. number of channels, time points, sampling frequency)
+- Parameter settings for the dataset (e.g. number of channels, time points, sampling frequency).
 - Model hyperparameters (e.g., embedding dimensions, attention heads).
 - Training parameters (e.g., batch size, epochs, learning rate，num_class).
 
-### 4.```CT_MIFNet.py``` and ```CT_MIFNet_2b.py```.
+### 4.```CT_MIFNet.py``` and ```CT_MIFNet_2b.py```
 Contains three main modules: ```CT_MIFNet()```, ```Trans()``` and ```main()```.
 - ```CT_MIFNet()``` is the core implementation of the model.
 - ```Trans()``` implements training and evaluation logic.
-- ```Main()``` is used to configure the environment (random seed), create instances of the Trans() class, and perform training for each subject
+- ```Main()``` is used to configure the environment (random seed), create instances of the Trans() class, and perform training for each subject.
 
 ---
 
