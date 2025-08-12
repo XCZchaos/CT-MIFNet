@@ -38,7 +38,7 @@ CT-MIFNet/
 
 ---
 
-## **File Descriptions **
+## **File Descriptions**
 
 1.prcessing file  
 - Execute BCI_2a_getData.m in Matlab to extract and preprocess the 2a dataset.
