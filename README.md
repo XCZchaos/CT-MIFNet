@@ -32,7 +32,7 @@ CT-MIFNet/
 |—— CT_MIFNet.py                            # Including CT-MIFNet and model training framework applied to 2a dataset  
 |—— CT_MIFNet_2b.py                         # Including CT-MIFNet and model training framework applied to 2b dataset  
 |—— Figure_01.png                           # CT-MIFNetm model framework diagram  
-|—— Figure_04.png                           # Comparison chart of results between CT-MIFNetm and other models on three datasets  
+|—— Figure_04.png                           # Comparison chart of results between CT-MIFNet and other models on three datasets  
 |—— LICENSE                                 # License file  
 |—— metric.py                               # Including custom functions such as FFT and LabelSmoothingLoss  
 ```
