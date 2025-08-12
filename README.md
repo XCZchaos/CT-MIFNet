@@ -82,6 +82,8 @@ You can directly run the model files TFCformer.py and TFCformer_2b.py. We will u
 
 ## Notice
 1.If you apply CT-MIFNet to other paradigms besides Motor Imagery, we recommend that you remove the CSP module. Based on our experiments in the Pain Perception paradigm, we found that the CSP had a negative impact on the model.
+
+
 2.Dataset III will be made public soon. At that time, we will release the code of CT-MIFNet on Dataset III.
 
 
