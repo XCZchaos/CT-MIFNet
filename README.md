@@ -20,7 +20,7 @@ proposed model.
 ---
 
 ## **Project Structure**
-
+'''
 CT-MIFNet/  
 |—— prcessing/                                
     └── BCI_2a_getData.m                    # Script for extraction and preprocessing of 2a dataset  
@@ -35,41 +35,41 @@ CT-MIFNet/
 |—— Figure_04.png                           # Comparison chart of results between CT-MIFNetm and other models on three datasets  
 |—— LICENSE                                 # License file  
 |—— metric.py                               # Including custom functions such as FFT and LabelSmoothingLoss  
-
+'''
 ---
 
 ## **File Descriptions**
 
-1.prcessing file  
-- Execute BCI_2a_getData.m in Matlab to extract and preprocess the 2a dataset.
-- Execute BCI_2a_getData_2b.m in Matlab to extract and preprocess the 2b dataset.
+### 1.prcessing file  
+- Execute '''BCI_2a_getData.m''' in Matlab to extract and preprocess the 2a dataset.
+- Execute '''BCI_2a_getData_2b.m''' in Matlab to extract and preprocess the 2b dataset.
 
-2.commom_spatial_pattern.py and commom_spatial_pattern_2b.py.
+### 2.'''commom_spatial_pattern.py''' and '''commom_spatial_pattern_2b.py'''.
 - Script for implementing multi-class CSP.
   
-3. config.py and config_2b.py
+### 3. config.py and config_2b.py
 A centralized file for managing global configurations, including:
 - Parameter settings for the dataset (e.g. number of channels, time points, sampling frequency)
 - Model hyperparameters (e.g., embedding dimensions, attention heads).
 - Training parameters (e.g., batch size, epochs, learning rate，num_class).
 
-4.CT_MIFNet.py and CT_MIFNet_2b.py.
-Contains three main modules: CT_MIFNet(), Trans() and main().
-- CT_MIFNet() is the core implementation of the model.
-- Trans() implements training and evaluation logic.
-- Main() is used to configure the environment (random seed), create instances of the Trans() class, and perform training for each subject
+### 4.'''CT_MIFNet.py''' and '''CT_MIFNet_2b.py.'''
+Contains three main modules: '''CT_MIFNet()''', '''Trans()''' and '''main()'''.
+- '''CT_MIFNet()''' is the core implementation of the model.
+- '''Trans()''' implements training and evaluation logic.
+- '''Main()''' is used to configure the environment (random seed), create instances of the Trans() class, and perform training for each subject
 
 ---
 
 ## **Supported Datasets**
 CT_MIFNet supports two EEG datasets and one Pain Percept dataset. Below are the recommended settings:  
-1.BCI Competition IV dataset 2a
-- Model Initialization：CT_MIFNet()
-- Key Parameters: classes=4
-2.BCI Competition IV dataset 2b  
-- Model Initialization：CT_MIFNet()
-- Key Parameters: classes=2
-3.EDLEP dataset
+### 1.BCI Competition IV dataset 2a
+- Model Initialization：'''CT_MIFNet()'''
+- Key Parameters: '''classes=4'''
+### 2.BCI Competition IV dataset 2b  
+- Model Initialization：'''CT_MIFNet()'''
+- Key Parameters: '''classes=2'''
+### 3.EDLEP dataset
 
 ---
 
