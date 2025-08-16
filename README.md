@@ -92,8 +92,8 @@ You can directly run the model files TFCformer.py and TFCformer_2b.py. We will u
 
 ## Acknowledges
 This code is based on the following repository. We would like to express our gratitude to these authors for their contributions to open-source work.
-<a href="https://github.com/eeyhsong/EEG-Transformer.git">https://github.com/eeyhsong/EEG-Transformer.git
 
+<a href="https://github.com/eeyhsong/EEG-Transformer.git">https://github.com/eeyhsong/EEG-Transformer.git
 
 <a href="https://github.com/lixujin1999/TFF-Former.git">https://github.com/lixujin1999/TFF-Former.git
 
