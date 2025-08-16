@@ -70,6 +70,7 @@ CT_MIFNet supports two EEG datasets and one Pain Percept dataset. Below are the 
 - Model Initialization：```CT_MIFNet()```
 - Key Parameters: ```classes=2```
 ### 3.EDLEP dataset
+- The data will be made public soon. Please stay tuned. When the data is made public, we will update the description of this section.
 
 ---
 
