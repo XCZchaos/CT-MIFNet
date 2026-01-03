@@ -77,7 +77,7 @@ CT_MIFNet supports two EEG datasets and one Pain Percept dataset. Below are the 
 
 ## **Usage**
 
-You can directly run the model files TFCformer.py and TFCformer_2b.py. We will update the descriptions for some files shortly after our paper is accepted.
+You can directly run the model files CT_MIFNet.py and CT_MIFNet_2b.py. We will update the descriptions for some files shortly after our paper is accepted.
 
 ---
 
