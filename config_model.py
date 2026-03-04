@@ -65,11 +65,9 @@ class LayerNorm(nn.Module):
 
 
 def calculate_cosine_similarity(x, y):
-    # 确保 x 和 y 的维度一致并且是三维 (batch_size, feature_dim_1, feature_dim_2)
-    # 展开最后一个维度 128 以计算余弦相似度
-    cos_sim = F.cosine_similarity(x, y, dim=-1)  # 在最后一个维度 128 上计算相似度
+    cos_sim = F.cosine_similarity(x, y, dim=-1)  # 
 
-    # 返回二维结果 (batch_size, feature_dim_1)
+    #  (batch_size, feature_dim_1)
     return cos_sim.detach().cpu().numpy()
 
 
@@ -87,21 +85,21 @@ def plot_heatmap(data, title, xlabel, ylabel,i):
 
 
 def plot_heat(temporal_features, frequency_features, i):
-    # 取出 batch 中的一个样本进行计算, shape: [250, 128]
-    temporal_sample = temporal_features[0]  # 取出第一个样本，shape为 [250, 128]
-    frequency_sample = frequency_features[0]  # 同样取出一个样本，shape为 [250, 128]
+    # shape: [250, 128]
+    temporal_sample = temporal_features[0]  # shape [250, 128]
+    frequency_sample = frequency_features[0]  # shape [250, 128]
 
-    # 将特征点的特征向量提取出来，shape: [128, 250]，因为我们要计算特征维度之间的相似性
-    temporal_features_128 = temporal_sample.T  # 转置，得到 [128, 250] 的张量，表示 128 维特征和 250 个特征点
-    frequency_features_128 = frequency_sample.T  # 同样转置
+    # shape: [128, 250]，
+    temporal_features_128 = temporal_sample.T  #  [128, 250] 
+    frequency_features_128 = frequency_sample.T  
 
     temporal_features_128 = temporal_features_128.detach().cpu().numpy()
     frequency_features_128 = frequency_features_128.detach().cpu().numpy()
 
-    # 计算时空特征和频空特征在 128 维度上的余弦相似度，得到 [128, 128] 的相似矩阵
+    # shape: [128, 128]
     similarity_matrix = cosine_similarity(temporal_features_128, frequency_features_128)
 
-    # 绘制余弦相似性热力图
+    
     plt.figure(figsize=(10, 8))
     sns.heatmap(similarity_matrix, annot=False, cmap='coolwarm', cbar=True)
     if i == 1:
@@ -111,4 +109,5 @@ def plot_heat(temporal_features, frequency_features, i):
     plt.xlabel("Frequency-Spatial Feature Dimensions")
     plt.ylabel("Temporal-Spatial Feature Dimensions")
     plt.savefig('/root/autodl-tmp/model_picture/' + str(i) + '_CCA_heatmap_new.png')
+
     plt.show()
