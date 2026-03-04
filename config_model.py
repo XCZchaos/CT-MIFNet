@@ -71,7 +71,7 @@ def calculate_cosine_similarity(x, y):
     return cos_sim.detach().cpu().numpy()
 
 
-# 绘制热力图函数
+# plot heatmap
 def plot_heatmap(data, title, xlabel, ylabel,i):
     plt.figure(figsize=(10, 8))
     sns.heatmap(data, cmap='coolwarm', cbar=True)
@@ -111,3 +111,4 @@ def plot_heat(temporal_features, frequency_features, i):
     plt.savefig('/root/autodl-tmp/model_picture/' + str(i) + '_CCA_heatmap_new.png')
 
     plt.show()
+
