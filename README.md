@@ -38,7 +38,7 @@ CT-MIFNet/
 |—— Figure_04.png                           # Comparison chart of results between CT-MIFNet and other models on three datasets  
 |—— LICENSE                                 # License file  
 |—— metric.py                               # Including custom functions such as FFT and LabelSmoothingLoss  
-|—— metric_newdata.py                               # Including custom functions for EDLEP dataset such as FFT and LabelSmoothingLoss  
+|—— metric_newdata.py                       # Including custom functions for EDLEP dataset such as FFT and LabelSmoothingLoss  
 
 ```
 ---
