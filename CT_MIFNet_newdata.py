@@ -322,7 +322,7 @@ class Mutihead_Attention(nn.Module):
 
             attention_score.masked_fill(mask, value=float("-inf"))
         attention_score = F.softmax(attention_score, dim=-1)
-        attention_score = self.dropout(attention_score)  # 应用Dropout
+        attention_score = self.dropout(attention_score)  
         output = torch.matmul(attention_score, V).reshape(x.shape[0], x.shape[1], -1)
         # print("Attention output shape : {}".format(output.shape))
 
@@ -376,12 +376,12 @@ class Add_Norm(nn.Module):
     def __init__(self, device, dropout_rate=0.3):
         super(Add_Norm, self).__init__()
         self.dropout = nn.Dropout(dropout_rate).to(device)
-        self.norm = nn.LayerNorm(128).to(device)  # 注意更新这里的LayerNorm以适应具体尺寸
+        self.norm = nn.LayerNorm(128).to(device)
 
     def forward(self, x, sub_layer, **kwargs):
         sub_output = sub_layer(x, **kwargs)
         x = x + sub_output
-        x = self.dropout(x)  # 应用Dropout
+        x = self.dropout(x)  
         return self.norm(x)
 
 
@@ -779,10 +779,10 @@ class Trans():
         for fold, (train_idx, val_idx) in enumerate(skf.split(self.data, self.label)):
             print(f"Training fold {fold + 1}...")
 
-            # 记录每个fold的开始时间
+            
             start_time = time.time()
 
-            # 重新初始化模型
+            
             self.model = TFCformer().cuda()
             self.model = nn.DataParallel(self.model, device_ids=[i for i in range(len(gpus))])
             self.model = self.model.cuda()
@@ -852,7 +852,7 @@ class Trans():
                         Y_true = val_label
                         Y_pred = y_pred
 
-            # 记录每个fold的结束时间
+            
             end_time = time.time()
             fold_time = end_time - start_time
             fold_times.append(fold_time)
@@ -868,7 +868,7 @@ class Trans():
 
             print(f'Fold {fold + 1} complete: Best Accuracy: {bestAcc}, Kappa: {kappa}')
 
-        # 获取最短的时间
+       
         min_fold_time = min(fold_times)
 
         print('Cross-validation complete.')
