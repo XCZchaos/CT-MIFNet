@@ -455,7 +455,6 @@ class Transformer(nn.Module):
         # frequency data encoder
         x_f = self.model(x_f1)
         # cross-modal
-        # 进行交叉计算 进行两次计算
         x_t2 = self.t(x_t, x_f)
         x_f2 = self.f(x_f, x_t)
 
