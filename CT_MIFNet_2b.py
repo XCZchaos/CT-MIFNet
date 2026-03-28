@@ -228,7 +228,7 @@ class Mutihead_Attention(nn.Module):
 
             attention_score.masked_fill(mask, value=float("-inf"))
         attention_score = F.softmax(attention_score, dim=-1)
-        attention_score = self.dropout(attention_score)  # 应用Dropout
+        attention_score = self.dropout(attention_score)  
         output = torch.matmul(attention_score, V).reshape(x.shape[0], x.shape[1], -1)
         # print("Attention output shape : {}".format(output.shape))
 
