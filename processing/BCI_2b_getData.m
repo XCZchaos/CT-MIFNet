@@ -1,8 +1,10 @@
 % auto adjust the EEG filter，and 6 stage cheby filter
 
-function data = getData(subject_index)
+function data = BCI_2b_getData(subject_index)
 
-subject_index = 2; % 1-9
+if nargin < 1
+    subject_index = 2; % original example subject
+end
 
 %% T data
 session_type = 'T'; % T and E
@@ -40,7 +42,7 @@ data_3 = zeros(1000,3,160);
 for j = 1:length(Typ1)
     if  Typ1(j) == 768
         k = k+1;
-        data_1(:,:,k) = s1((Pos1(j)+750):(Pos1(j)+1749),1:3)
+        data_1(:,:,k) = s1((Pos1(j)+750):(Pos1(j)+1749),1:3);
     end
 end
 
@@ -55,7 +57,7 @@ k = 0;
 for j = 1:length(Typ2)
     if  Typ2(j) == 768
         k = k+1;
-        data_2(:,:,k) = s2((Pos2(j)+750):(Pos2(j)+1749),1:3)
+        data_2(:,:,k) = s2((Pos2(j)+750):(Pos2(j)+1749),1:3);
     end
 end
 
@@ -68,7 +70,7 @@ k = 0;
 for j = 1:length(Typ3)
     if  Typ3(j) == 768
         k = k+1;
-        data_3(:,:,k) = s3((Pos3(j)+750):(Pos3(j)+1749),1:3)
+        data_3(:,:,k) = s3((Pos3(j)+750):(Pos3(j)+1749),1:3);
     end
 end
 

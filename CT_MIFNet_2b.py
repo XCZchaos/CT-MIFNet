@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import numpy as np
 import math
 import random
@@ -11,6 +12,7 @@ warnings.filterwarnings("ignore")
 from torch.autograd import Variable
 from metric import GELU, Corr, LabelSmoothingLoss
 from config_2b import config
+from experiment_args import BCI_SUBJECTS, parse_experiment_args
 
 import torch
 import torch.nn.functional as F
@@ -508,8 +510,27 @@ class CT_MIFNet(nn.Module):
 
 
 
+DEFAULT_DATA_DIR = '/root/autodl-tmp/data/BCICIV_2b_gdf/'
+
+
+def _subject_files(data_dir, subject):
+    directory = Path(data_dir)
+    expected_pairs = []
+    for prefix in ('B', 'A'):
+        stem = f'{prefix}{subject:02d}processing'
+        train = directory / f'{stem}_T.mat'
+        evaluation = directory / f'{stem}_E.mat'
+        if train.is_file() and evaluation.is_file():
+            return train, evaluation
+        expected_pairs.append(f'{train.name} and {evaluation.name}')
+    raise FileNotFoundError(
+        f"No complete BCI IV-2b file pair for subject {subject} in {directory}. "
+        f"Expected {' or '.join(expected_pairs)}."
+    )
+
+
 class Trans():
-    def __init__(self, nsub):
+    def __init__(self, nsub, data_dir=DEFAULT_DATA_DIR):
         super(Trans, self).__init__()
         self.batch_size = 64
         self.n_epochs = 1000
@@ -520,9 +541,9 @@ class Trans():
         self.lr = 0.0002
         self.b1 = 0.5
         self.b2 = 0.9
-        self.nSub = 9
+        self.nSub = nsub
         self.start_epoch = 0
-        self.root = self.root = '/root/autodl-tmp/data/BCICIV_2b_gdf/'  # the path of data
+        self.root = data_dir
 
         self.pretrain = False
 
@@ -546,7 +567,8 @@ class Trans():
     def get_source_data(self):
 
         # to get the data of target subject
-        self.total_data = scipy.io.loadmat(self.root + 'A0%dprocessing_T.mat' % self.nSub)
+        train_file, eval_file = _subject_files(self.root, self.nSub)
+        self.total_data = scipy.io.loadmat(train_file)
         self.train_data = self.total_data['data']
         self.train_label = self.total_data['label']
 
@@ -559,7 +581,7 @@ class Trans():
 
         # test data
         # to get the data of target subject
-        self.test_tmp = scipy.io.loadmat(self.root + 'A0%dprocessing_E.mat' % self.nSub)
+        self.test_tmp = scipy.io.loadmat(eval_file)
         self.test_data = self.test_tmp['data']
         self.test_label = self.test_tmp['label']
 
@@ -712,12 +734,8 @@ class Trans():
         return bestAcc, averAcc, Y_true, Y_pred, kappa
 
 
-def main():
-    best = 0
-    aver = 0
-
-
-    for i in range(9):
+def main(subjects=BCI_SUBJECTS, data_dir=DEFAULT_DATA_DIR):
+    for subject in subjects:
         seed_n = np.random.randint(500)
         print('seed is ' + str(seed_n))
         random.seed(seed_n)
@@ -725,27 +743,15 @@ def main():
         torch.manual_seed(seed_n)
         torch.cuda.manual_seed(seed_n)
         torch.cuda.manual_seed_all(seed_n)
-        print('Subject %d' % (i+1))
-        trans = Trans(i + 1)
-        bestAcc, averAcc, Y_true, Y_pred, kappa = trans.train()
-        print('THE BEST ACCURACY IS ' + str(bestAcc))
-
-
-        best = best + bestAcc
-        aver = aver + averAcc
-        if i == 0:
-            yt = Y_true
-            yp = Y_pred
-        else:
-            yt = torch.cat((yt, Y_true))
-            yp = torch.cat((yp, Y_pred))
-
-
-    best = best / 9
-    aver = aver / 9
-
-
+        print('Subject %d' % subject)
+        trans = Trans(subject, data_dir=data_dir)
+        best_acc = trans.train()[0]
+        print('THE BEST ACCURACY IS ' + str(best_acc))
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_experiment_args(
+        "BCI Competition IV-2b", data_dir=DEFAULT_DATA_DIR, subjects=BCI_SUBJECTS,
+        max_subject=9,
+    )
+    main(**vars(args))

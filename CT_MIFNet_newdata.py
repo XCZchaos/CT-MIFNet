@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import mne
 import numpy as np
@@ -14,6 +15,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from torch.autograd import Variable
 from metric_newdata import GELU, Corr, LabelSmoothingLoss
 from config_newdata import config
+from experiment_args import parse_experiment_args
 
 import torch
 import torch.nn.functional as F
@@ -616,8 +618,13 @@ class TFCformer(nn.Module):
 
 
 
+DEFAULT_DATA_DIR = '/root/autodl-tmp/data/CAS_dataset/'
+DEFAULT_OUTPUT_DIR = '/root/autodl-tmp/paper_model/'
+DEFAULT_SUBJECTS = (1, 3, 5, 8, 10, 12, 15, 18, 28)
+
+
 class Trans():
-    def __init__(self, nsub):
+    def __init__(self, nsub, data_dir=DEFAULT_DATA_DIR):
         super(Trans, self).__init__()
         self.batch_size = 50
         self.n_epochs = 200
@@ -630,7 +637,7 @@ class Trans():
         self.b2 = 0.9
         self.nSub = nsub
         self.start_epoch = 0
-        self.root = self.root = '/root/autodl-tmp/data/CAS_dataset/'  # the path of data
+        self.root = data_dir
 
         self.pretrain = False
 
@@ -657,10 +664,7 @@ class Trans():
         The filename is your subject file not a directory
         The data type is numpy.ndarray
         """
-        if self.nSub < 10:
-            filename = self.root + 'sub-00%d_29ByANT.set' % self.nSub
-        else:
-            filename = self.root + 'sub-0%d_29ByANT.set' % self.nSub
+        filename = Path(self.root) / f'sub-{self.nSub:03d}_29ByANT.set'
         epoch = mne.io.read_epochs_eeglab(filename)
         # epoch.resample(250)
         # standardize
@@ -688,7 +692,7 @@ class Trans():
     def get_source_data(self):
 
         # to get the data of target subject
-        self.total_data = scipy.io.loadmat(self.root + 'A0%dprocessing_T.mat' % self.nSub)
+        self.total_data = scipy.io.loadmat(os.path.join(self.root, f'A0{self.nSub}processing_T.mat'))
         self.train_data = self.total_data['data']
         self.train_label = self.total_data['label']
 
@@ -702,7 +706,7 @@ class Trans():
         # test data
         # to get the data of target subject
 
-        self.test_tmp = scipy.io.loadmat(self.root + 'sub-00%d_29ByANT' % self.nSub)
+        self.test_tmp = scipy.io.loadmat(os.path.join(self.root, f'sub-00{self.nSub}_29ByANT'))
         self.test_data = self.test_tmp['data']
         self.test_label = self.test_tmp['label']
 
@@ -885,14 +889,10 @@ class Trans():
                     f'kappa = {kappa_all_folds:.6f}, Shortest Time = {min_fold_time:.2f} seconds\n')
 
 
-def main():
-    best = 0
-    aver = 0
-    arr_list = [1, 3, 5, 8, 10, 12, 15, 18, 28]
-
-
-    # for i in range(0, 29):
-    for i in arr_list:
+def main(subjects=DEFAULT_SUBJECTS, data_dir=DEFAULT_DATA_DIR, output_dir=DEFAULT_OUTPUT_DIR):
+    log_file = Path(output_dir) / 'TFCformer_best_acc.txt'
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    for subject in subjects:
         seed_n = np.random.randint(500)
         print('seed is ' + str(seed_n))
         random.seed(seed_n)
@@ -900,19 +900,22 @@ def main():
         torch.manual_seed(seed_n)
         torch.cuda.manual_seed(seed_n)
         torch.cuda.manual_seed_all(seed_n)
-        # print('Subject %d' % (i+1))
-        print('Subject %d' % (i))
-        # trans = Trans(i + 1)
-        trans = Trans(i)
-        bestAcc, averAcc, Y_true, Y_pred, kappa, min_fold_time = trans.train()
-        trans.write_best_acc_to_file(i+1, np.max(bestAcc), np.mean(averAcc), np.max(kappa), min_fold_time)
+        print('Subject %d' % subject)
+        trans = Trans(subject, data_dir=data_dir)
+        bestAcc, averAcc, _, _, kappa, min_fold_time = trans.train()
+        trans.write_best_acc_to_file(
+            subject, np.max(bestAcc), np.mean(averAcc), np.max(kappa), min_fold_time,
+            filename=log_file,
+        )
         print('THE BEST ACCURACY IS ' + str(np.max(bestAcc)))
 
 
-
-
 if __name__ == "__main__":
-    main()
+    args = parse_experiment_args(
+        "EDLEP", data_dir=DEFAULT_DATA_DIR, subjects=DEFAULT_SUBJECTS,
+        max_subject=29, output_dir=DEFAULT_OUTPUT_DIR,
+    )
+    main(**vars(args))
 
 
 

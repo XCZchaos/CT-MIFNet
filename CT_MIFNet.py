@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import numpy as np
 import math
 import random
@@ -10,6 +11,7 @@ from sklearn.metrics import cohen_kappa_score
 from torch.autograd import Variable
 from metric import GELU, Corr, LabelSmoothingLoss, STFT_Corr
 from config import config
+from experiment_args import BCI_SUBJECTS, parse_experiment_args
 from config_model import Conv2dWithConstraint, LinearWithConstraint, calculate_cosine_similarity, plot_heat
 
 import torch
@@ -510,17 +512,22 @@ class CT_MIFNet(nn.Module):
 
 
 
+DEFAULT_DATA_DIR = '/root/autodl-tmp/data/BCICIV_2a_gdf_01/'
+DEFAULT_OUTPUT_DIR = '/root/autodl-tmp/model_picture/'
+
+
 class Trans():
-    def __init__(self, nsub):
+    def __init__(self, nsub, data_dir=DEFAULT_DATA_DIR, output_dir=DEFAULT_OUTPUT_DIR):
         super(Trans, self).__init__()
         self.batch_size = 50
         self.n_epochs = 200
         self.lr = 0.0002
         self.b1 = 0.5
         self.b2 = 0.9
-        self.nSub = 3
+        self.nSub = nsub
         self.start_epoch = 0
-        self.root = '/root/autodl-tmp/data/BCICIV_2a_gdf_01/'  # the path of data
+        self.root = data_dir
+        self.output_dir = Path(output_dir)
         self.pretrain = False
         self.Tensor = torch.cuda.FloatTensor
         self.LongTensor = torch.cuda.LongTensor
@@ -531,7 +538,7 @@ class Trans():
         self.criterion = LabelSmoothingLoss(4, config.smooth).to('cuda')
 
     def get_source_data(self):
-        self.total_data = scipy.io.loadmat(self.root + 'A0%dT.mat' % self.nSub)
+        self.total_data = scipy.io.loadmat(Path(self.root) / f'A{self.nSub:02d}T.mat')
         self.train_data = self.total_data['data']
         self.train_label = self.total_data['label']
         self.train_data = np.transpose(self.train_data, (2, 1, 0))
@@ -539,7 +546,7 @@ class Trans():
         self.train_label = np.transpose(self.train_label)
         self.allData = self.train_data
         self.allLabel = self.train_label[0]
-        self.test_tmp = scipy.io.loadmat(self.root + 'A0%dE.mat' % self.nSub)
+        self.test_tmp = scipy.io.loadmat(Path(self.root) / f'A{self.nSub:02d}E.mat')
         self.test_data = self.test_tmp['data']
         self.test_label = self.test_tmp['label']
         self.test_data = np.transpose(self.test_data, (2, 1, 0))
@@ -594,6 +601,8 @@ class Trans():
 
     def train(self):
         img, label, test_data, test_label = self.get_source_data()
+        plot_dir = self.output_dir / f'subject-{self.nSub:02d}'
+        plot_dir.mkdir(parents=True, exist_ok=True)
         img = torch.from_numpy(img)
         label = torch.from_numpy(label - 1)
         dataset = torch.utils.data.TensorDataset(img, label)
@@ -661,10 +670,11 @@ class Trans():
                 if e == self.n_epochs - 1:
                     data_1 = calculate_cosine_similarity(x_f, x_t)
                     data_2 = calculate_cosine_similarity(x_f2, x_t2)
-                    plot_heat(x_t, x_f, i=1)
-                    plot_heat(x_t2, x_f2, i=2)
+                    plot_heat(x_t, x_f, i=1, output_dir=plot_dir)
+                    plot_heat(x_t2, x_f2, i=2, output_dir=plot_dir)
 
-        torch.save(self.model.module.state_dict(), '/root/autodl-tmp/model_picture/TFCformer_model_Subject_%d.pth' % (self.nSub))
+        checkpoint = self.output_dir / f'TFCformer_model_Subject_{self.nSub}.pth'
+        torch.save(self.model.module.state_dict(), checkpoint)
         averAcc = averAcc / num
         print('The average accuracy is:', averAcc)
         print('The best accuracy is:', bestAcc)
@@ -674,10 +684,8 @@ class Trans():
 
 
 
-def main():
-    best = 0
-    aver = 0
-    for i in range(9):
+def main(subjects=BCI_SUBJECTS, data_dir=DEFAULT_DATA_DIR, output_dir=DEFAULT_OUTPUT_DIR):
+    for subject in subjects:
         seed_n = np.random.randint(500)
         print('seed is ' + str(seed_n))
         random.seed(seed_n)
@@ -685,21 +693,16 @@ def main():
         torch.manual_seed(seed_n)
         torch.cuda.manual_seed(seed_n)
         torch.cuda.manual_seed_all(seed_n)
-        print('Subject %d' % (i+1))
-        trans = Trans(i + 1)
-        bestAcc, averAcc, Y_true, Y_pred, kappa = trans.train()
-        print('THE BEST ACCURACY IS ' + str(bestAcc))
-
-        best = best + bestAcc
-        aver = aver + averAcc
-        if i == 0:
-            yt = Y_true
-            yp = Y_pred
-        else:
-            yt = torch.cat((yt, Y_true))
-            yp = torch.cat((yp, Y_pred))
+        print('Subject %d' % subject)
+        trans = Trans(subject, data_dir=data_dir, output_dir=output_dir)
+        best_acc = trans.train()[0]
+        print('THE BEST ACCURACY IS ' + str(best_acc))
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_experiment_args(
+        "BCI Competition IV-2a", data_dir=DEFAULT_DATA_DIR, subjects=BCI_SUBJECTS,
+        max_subject=9, output_dir=DEFAULT_OUTPUT_DIR,
+    )
+    main(**vars(args))
 

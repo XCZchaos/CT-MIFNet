@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -84,7 +86,7 @@ def plot_heatmap(data, title, xlabel, ylabel,i):
 
 
 
-def plot_heat(temporal_features, frequency_features, i):
+def plot_heat(temporal_features, frequency_features, i, output_dir='/root/autodl-tmp/model_picture/'):
     # shape: [250, 128]
     temporal_sample = temporal_features[0]  # shape [250, 128]
     frequency_sample = frequency_features[0]  # shape [250, 128]
@@ -108,7 +110,7 @@ def plot_heat(temporal_features, frequency_features, i):
         plt.title("Cross-Covariance Attention - Similarity After Feature Interaction")
     plt.xlabel("Frequency-Spatial Feature Dimensions")
     plt.ylabel("Temporal-Spatial Feature Dimensions")
-    plt.savefig('/root/autodl-tmp/model_picture/' + str(i) + '_CCA_heatmap_new.png')
+    plt.savefig(Path(output_dir) / f'{i}_CCA_heatmap_new.png')
 
     plt.show()
 

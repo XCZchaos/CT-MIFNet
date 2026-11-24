@@ -50,30 +50,36 @@ Install a CUDA-enabled build of PyTorch for your GPU, then install the shared Py
 python -m pip install numpy scipy scikit-learn einops matplotlib seaborn
 ```
 
-In the training script for your dataset, set `gpus` to the devices you will use and `self.root` to the data directory, including its trailing slash.
+Set `gpus` in the training script to the CUDA devices you will use. Pass the prepared data directory with `--data-dir`. Use `--subjects` to select one or more participants in the order you want to run them.
 
 <details>
 <summary><strong>Prepare BCI Competition IV data</strong></summary>
 
-Use MATLAB with BioSig and the Signal Processing Toolbox to preprocess each subject’s GDF recordings and class labels. Set the input paths, output paths and `subject_index` in the script for your dataset. [Competition recordings](https://bbci.de/competition/iv/download/) · [Class labels](https://www.bbci.de/competition/iv/results/index.html).
+Use MATLAB with BioSig and the Signal Processing Toolbox to preprocess each subject’s GDF recordings and class labels. Set the input and output paths in the MATLAB function for your dataset, then call it with the subject number (1–9). [Competition recordings](https://bbci.de/competition/iv/download/) · [Class labels](https://www.bbci.de/competition/iv/results/index.html).
 
-- **2a.** The [2a preprocessing script](processing/BCI_2a_getData.m) writes a training file and an evaluation file per subject, for example `A03T.mat` and `A03E.mat`. Set the checkpoint path in `CT_MIFNet.py` and the heatmap path in [config_model.py](config_model.py) to existing output directories.
-- **2b.** The [2b preprocessing script](processing/BCI_2b_getData.m) writes files such as `B09processing_T.mat` and `B09processing_E.mat`. The Python loader expects the prefix `A`. Set its two filename templates to use `B` to match the MATLAB output.
+- **2a.** Running [`BCI_2a_getData(3)`](processing/BCI_2a_getData.m) writes `A03T.mat` and `A03E.mat`. The training script saves a checkpoint for each subject and places its two heatmaps in a matching `subject-XX` subdirectory.
+- **2b.** Running [`BCI_2b_getData(9)`](processing/BCI_2b_getData.m) writes `B09processing_T.mat` and `B09processing_E.mat`. The loader uses this pair when available and accepts a complete pair with the older `A` prefix.
 
-The released BCI scripts fix `self.nSub` at `3` for 2a and `9` for 2b. To train on each subject selected by `main()`, set `self.nSub = nsub` in `Trans.__init__`.
+Without `--subjects`, both BCI scripts train subjects 1 through 9.
 
 </details>
 
 <details>
 <summary><strong>Prepare EDLEP data</strong></summary>
 
-Install MNE-Python (`python -m pip install mne`). The loader reads epoched EEGLAB files such as `sub-001_29ByANT.set` directly from `self.root`. Keep the matching `.fdt` alongside each `.set` file. Set the log path in `write_best_acc_to_file()` to an existing output directory.
+Install MNE-Python (`python -m pip install mne`). The loader reads epoched EEGLAB files such as `sub-001_29ByANT.set` from `--data-dir`. Keep the matching `.fdt` alongside each `.set` file. By default, the script trains the nine EDLEP subjects listed in [Datasets and results](#datasets-and-results).
 
 The released script applies common spatial patterns (CSP) in `get_event_data()`. In our pain-perception experiments, CSP reduced performance. We recommend omitting this spatial filter when adapting CT-MIFNet beyond motor imagery.
 
 </details>
 
-Run the command for your dataset from the repository root.
+Run the command for your dataset from the repository root. This example trains BCI IV-2b subjects 2 and 7.
+
+```bash
+python CT_MIFNet_2b.py --data-dir ./data/2b --subjects 2 7
+```
+
+On BCI IV-2a, `--output-dir` sets the directory for checkpoints and heatmaps. On EDLEP, it sets the directory for the results log.
 
 | Dataset configuration | Training command |
 | --- | --- |

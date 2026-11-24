@@ -7,10 +7,10 @@ from sklearn.metrics import confusion_matrix
 import torch
 
 def csp(data_train, label_train):
-    idx_0 = np.squeeze(np.where(label_train == 0))
-    idx_1 = np.squeeze(np.where(label_train == 1))
-    idx_2 = np.squeeze(np.where(label_train == 2))
-    idx_3 = np.squeeze(np.where(label_train == 3))
+    idx_0 = np.flatnonzero(label_train == 0)
+    idx_1 = np.flatnonzero(label_train == 1)
+    idx_2 = np.flatnonzero(label_train == 2)
+    idx_3 = np.flatnonzero(label_train == 3)
 
     W = []
     for n_class in range(4):
@@ -26,6 +26,11 @@ def csp(data_train, label_train):
         elif n_class == 3:
             idx_L = idx_3
             idx_R = np.concatenate((idx_0, idx_1, idx_2))
+
+        if idx_L.size == 0 or idx_R.size == 0:
+            # The released model reserves two output columns for each of its four class slots.
+            W.append(np.zeros((data_train.shape[-1], 2)))
+            continue
 
         idx_R = np.sort(idx_R)
         Cov_L = np.zeros([32, 32, len(idx_L)])

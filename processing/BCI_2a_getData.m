@@ -3,9 +3,11 @@
 % using open-source toolbox Biosig on MATLAB: http://biosig.sourceforge.net/
 % Just an example, you should change as you need.
 
-function data = getData(subject_index)
+function data = BCI_2a_getData(subject_index)
 
-subject_index = 9; % 1-9
+if nargin < 1
+    subject_index = 9; % original example subject
+end
 
 %% T data
 session_type = 'T'; % T and E
