@@ -1,147 +1,138 @@
-# **CT-MIFNet: Convolutional Transformer-based Multi-View Interaction and Fusion Network for EEG Decoding [(paper)](https://www.sciencedirect.com/science/article/abs/pii/S1746809425009322)**
+<h1 align="center">CT-MIFNet</h1>
 
-This repository provides the implementation of **CT-MIFNet**, a deep learning model based on CNN and Transformer, which enhances model performance by interacting with and fusing information from different views.
+<p align="center"><strong>Convolutional Transformer-based Multi-View Interaction and Fusion Network for EEG Decoding</strong></p>
 
----
+<p align="center">
+  <a href="https://doi.org/10.1016/j.bspc.2025.108421"><img src="https://img.shields.io/badge/Paper-BSPC%202026-087E82?style=flat-square" alt="Paper in Biomedical Signal Processing and Control, 2026"></a>
+  <a href="https://openneuro.org/datasets/ds005285/versions/1.0.0"><img src="https://img.shields.io/badge/EDLEP-v1.0.0-526C9C?style=flat-square" alt="EDLEP release 1.0.0 on OpenNeuro"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-596673?style=flat-square" alt="Apache License 2.0"></a>
+</p>
 
-## **Features**
-- A novel parallel dual-branch convolutional Transformer-based multi-view
-interaction and fusion network is proposed for EEG decoding.
+<p align="center">
+  <a href="#architecture">Architecture</a> &nbsp;·&nbsp;
+  <a href="#datasets-and-results">Results</a> &nbsp;·&nbsp;
+  <a href="#run-an-experiment">Training</a> &nbsp;·&nbsp;
+  <a href="#citation">Citation</a>
+</p>
 
-- A cross-covariance attention mechanism is introduced to facilitate feature
-interaction and fusion across diverse perspectives while reducing computational
-load.
-- Extensive comparisons with the state-of-the-art models on three datasets with two
-distinct BCI paradigms demonstrate the generalization and robustness of the
-proposed model.
+## Architecture
 
-![model](Figure_01.png)
-![model](Figure_04.png)
----
+CT-MIFNet decodes motor imagery and laser-evoked pain from EEG. One branch follows the signal over time. The other uses a fast Fourier transform (FFT) to represent the same trial in the frequency domain. Multi-scale convolutions extract features from each view, and **cross-covariance attention** lets the two branches exchange information before classification.
 
-## **Project Structure**
+[![CT-MIFNet architecture showing spatial filtering, parallel temporal and frequency branches, cross-covariance attention, and the classifier](Figure_01.png)](Figure_01.png?raw=true)
+
+<p align="center"><sub><a href="Figure_01.png?raw=true">View the architecture diagram at full resolution</a></sub></p>
+
+## Datasets and results
+
+Accuracy and Cohen’s κ are averaged across nine subjects per dataset. [Paper, Tables 4–6](https://doi.org/10.1016/j.bspc.2025.108421).
+
+| Dataset | EEG task | Accuracy | κ |
+| --- | --- | ---: | ---: |
+| [BCI IV-2a](https://www.bbci.de/competition/iv/desc_2a.pdf) | 4-class motor imagery | **81.67%** | 0.7556 |
+| [BCI IV-2b](https://www.bbci.de/competition/iv/desc_2b.pdf) | 2-class motor imagery | **86.75%** | 0.7109 |
+| [EDLEP](https://openneuro.org/datasets/ds005285/versions/1.0.0) | 2-class pain perception | **83.48%** | 0.6703 |
+
+For EDLEP, we used subjects 1, 3, 5, 8, 10, 12, 15, 18 and 28 from OpenNeuro release 1.0.0.
+
+<details>
+<summary>Compare methods and individual subjects (Tables 4–6)</summary>
+
+[![Tables 4 to 6 from the paper, comparing CT-MIFNet with baseline methods for each subject on all three datasets](Figure_04.png)](Figure_04.png?raw=true)
+
+</details>
+
+## Run an experiment
+
+Install a CUDA-enabled build of PyTorch for your GPU, then install the shared Python dependencies. [PyTorch installation guide](https://pytorch.org/get-started/locally/).
+
+```bash
+python -m pip install numpy scipy scikit-learn einops matplotlib seaborn
 ```
-CT-MIFNet/  
-|—— prcessing/                                
-    └── BCI_2a_getData.m                    # Script for extraction and preprocessing of 2a dataset  
-    └── BCI_2b_getData.m                    # Script for extraction and preprocessing of 2b dataset  
-|—— commom_spatial_pattern.py               # CSP function of the 2a dataset  
-|—— commom_spatial_pattern_2b.py            # CSP function of the 2b dataset  
-|—— commom_spatial_pattern_newdata.py       # CSP function of the EDLEP dataset 
-|—— config.py                               # Global configuration file for the 2a dataset project  
-|—— config_2b.py                            # Global configuration file for the 2b dataset project  
-|—— config_newdata.py                       # Global configuration file for the EDLEP dataset project  
-|—— CT_MIFNet.py                            # Including CT-MIFNet and model training framework applied to 2a dataset  
-|—— CT_MIFNet_2b.py                         # Including CT-MIFNet and model training framework applied to 2b dataset  
-|—— CT_MIFNet_newdata.py                    # Including CT-MIFNet and model training framework applied to EDLEP dataset 
-|—— Figure_01.png                           # CT-MIFNetm model framework diagram  
-|—— Figure_04.png                           # Comparison chart of results between CT-MIFNet and other models on three datasets  
-|—— LICENSE                                 # License file  
-|—— metric.py                               # Including custom functions such as FFT and LabelSmoothingLoss  
-|—— metric_newdata.py                       # Including custom functions for EDLEP dataset such as FFT and LabelSmoothingLoss  
 
-```
----
+In the training script for your dataset, set `gpus` to the devices you will use and `self.root` to the data directory, including its trailing slash.
 
-## **File Descriptions**
+<details>
+<summary><strong>Prepare BCI Competition IV data</strong></summary>
 
-### 1.prcessing file  
-- Execute ```BCI_2a_getData.m``` in Matlab to extract and preprocess the 2a dataset.
-- Execute ```BCI_2a_getData_2b.m``` in Matlab to extract and preprocess the 2b dataset.
+Use MATLAB with BioSig and the Signal Processing Toolbox to preprocess each subject’s GDF recordings and class labels. Set the input paths, output paths and `subject_index` in the script for your dataset. [Competition recordings](https://bbci.de/competition/iv/download/) · [Class labels](https://www.bbci.de/competition/iv/results/index.html).
 
-### 2.```commom_spatial_pattern.py``` , ```commom_spatial_pattern_2b.py``` and ```commom_spatial_pattern_newdata.py```
-- Script for implementing multi-class CSP.
-  
-### 3. ```config.py``` , ```config_2b.py``` and ```config_newdata.py```
-A centralized file for managing global configurations, including:
-- Parameter settings for the dataset (e.g. number of channels, time points, sampling frequency).
-- Model hyperparameters (e.g., embedding dimensions, attention heads).
-- Training parameters (e.g., batch size, epochs, learning rate，num_class).
+- **2a.** The [2a preprocessing script](processing/BCI_2a_getData.m) writes a training file and an evaluation file per subject, for example `A03T.mat` and `A03E.mat`. Set the checkpoint path in `CT_MIFNet.py` and the heatmap path in [config_model.py](config_model.py) to existing output directories.
+- **2b.** The [2b preprocessing script](processing/BCI_2b_getData.m) writes files such as `B09processing_T.mat` and `B09processing_E.mat`. The Python loader expects the prefix `A`. Set its two filename templates to use `B` to match the MATLAB output.
 
-### 4.```CT_MIFNet.py``` , ```CT_MIFNet_2b.py```and ```CT_MIFNet_newdata.py```
-Contains three main modules: ```CT_MIFNet()```, ```Trans()``` and ```main()```.
-- ```CT_MIFNet()``` is the core implementation of the model.
-- ```Trans()``` implements training and evaluation logic.
-- ```Main()``` is used to configure the environment (random seed), create instances of the Trans() class, and perform training for each subject.
+The released BCI scripts fix `self.nSub` at `3` for 2a and `9` for 2b. To train on each subject selected by `main()`, set `self.nSub = nsub` in `Trans.__init__`.
 
----
+</details>
 
-## **Supported Datasets**
-CT_MIFNet supports two EEG datasets and one Pain Percept dataset. Below are the recommended settings:  
-### 1.BCI Competition IV dataset 2a
-- Model Initialization：```CT_MIFNet()```
-- Key Parameters:```classes=4```
-### 2.BCI Competition IV dataset 2b  
-- Model Initialization：```CT_MIFNet()```
-- Key Parameters: ```classes=2```
-### 3.EDLEP dataset
-- The data will be made public soon. Please stay tuned. When the data is made public, we will update the description of this section.
+<details>
+<summary><strong>Prepare EDLEP data</strong></summary>
 
----
+Install MNE-Python (`python -m pip install mne`). The loader reads epoched EEGLAB files such as `sub-001_29ByANT.set` directly from `self.root`. Keep the matching `.fdt` alongside each `.set` file. Set the log path in `write_best_acc_to_file()` to an existing output directory.
 
+The released script applies common spatial patterns (CSP) in `get_event_data()`. In our pain-perception experiments, CSP reduced performance. We recommend omitting this spatial filter when adapting CT-MIFNet beyond motor imagery.
 
-## **Usage**
+</details>
 
-You can directly run the model files CT_MIFNet.py , CT_MIFNet_2b.py and CT_MIFNet_newdata.py We will update the descriptions for some files shortly after our paper is accepted.
+Run the command for your dataset from the repository root.
 
----
+| Dataset configuration | Training command |
+| --- | --- |
+| [BCI IV-2a](config.py) | [`python CT_MIFNet.py`](CT_MIFNet.py) |
+| [BCI IV-2b](config_2b.py) | [`python CT_MIFNet_2b.py`](CT_MIFNet_2b.py) |
+| [EDLEP](config_newdata.py) | [`python CT_MIFNet_newdata.py`](CT_MIFNet_newdata.py) |
 
-## Notice⚠️⚠️⚠️
-1.If you apply CT-MIFNet to other paradigms besides Motor Imagery, we recommend that you remove the CSP module. Based on our experiments in the Pain Perception paradigm, we found that the CSP had a negative impact on the model.
+<details>
+<summary>Implementation guide</summary>
 
+- Each training script defines the network, the `Trans` training and evaluation class, and the subject loop in `main()`. The EDLEP script names its model class `TFCformer`.
+- The spatial filters are implemented separately for [BCI IV-2a](commom_spatial_pattern.py), [BCI IV-2b](commom_spatial_pattern_2b.py) and [EDLEP](commom_spatial_pattern_newdata.py).
+- The FFT and label-smoothing helpers are in [metric.py](metric.py) for BCI and [metric_newdata.py](metric_newdata.py) for EDLEP.
 
-2.Dataset III has been made public. we had released the code of CT-MIFNet on Dataset III.
+</details>
 
----
+## Citation
 
-# News🎉🎉🎉
-Dataset III is now available at https://openneuro.org/datasets/ds005285/versions/1.0.0 and we have uploaded our code. we selected subjects 1, 3, 5, 8, 10, 12, 15, 18 and 28 in our experiments.
+If you use CT-MIFNet, please cite our model paper. If you use EDLEP, please also cite the dataset paper.
 
+<details>
+<summary><strong>CT-MIFNet</strong> · Xiong et al., <em>Biomedical Signal Processing and Control</em> (2026)</summary>
 
----
-
-## Acknowledges
-This code is based on the following repository. We would like to express our gratitude to these authors for their contributions to open-source work.
-
-<a href="https://github.com/eeyhsong/EEG-Transformer.git">https://github.com/eeyhsong/EEG-Transformer.git
-
-<a href="https://github.com/lixujin1999/TFF-Former.git">https://github.com/lixujin1999/TFF-Former.git
-
----
-
-## **Citation**
-Hope this code can be useful. I would appreciate you citing us in your paper. 💐😊
-```
+```bibtex
 @article{XIONG2026108421,
-title = {CT-MIFNet: Convolutional transformer-based multi-view interaction and fusion network for EEG decoding},
-journal = {Biomedical Signal Processing and Control},
-volume = {112},
-pages = {108421},
-year = {2026},
-issn = {1746-8094},
-doi = {https://doi.org/10.1016/j.bspc.2025.108421},
-url = {https://www.sciencedirect.com/science/article/pii/S1746809425009322},
-author = {Yibo Xiong and Jinming Li and Yun Zhuang and Xiangyue Zhao and Yilu Xu and Lilin Jie},
-keywords = {Brain-computer interface, Motor Imagery, Pain Perception, Transformer, Multi-view Information, Feature Interaction and Fusion},
-abstract = {Convolutional neural networks (CNNs) are effective at extracting local features but are limited in capturing long-term dependencies due to their fixed kernel size. In contrast, Transformers are capable of capturing long-range dependencies through the self-attention mechanism.Although there are frameworks that extract both local and global features by combining CNN with Transformer in brain-computer interface (BCI) systems, multi-view features have not been effectively explored in Electroencephalography (EEG) decoding. Moreover, the increased computational complexity introduced by the attention mechanism in Transformers poses challenges, hindering their application to EEG signals with long sequence. Therefore, a novel Convolutional Transformer-based multi-view Interaction and Fusion Network (CT-MIFNet) is proposed. Initially, the preprocessed EEG signals are passed through a spatial transformation module, which reduces dimensionality while minimizing noise. After undergoing fast fourier transform (FFT) and branching into two separate paths, the signals are input into a Patch Embedding module with multi-scale convolution mapping to extract temporal, frequency, and spatial features. Subsequently, to enhance feature representations, these local features are processed by the Transformer-based Feature Interaction and Fusion module, which leverages Cross-Covariance Attention (CCA) to reduce computational complexity while facilitating the exchange and fusion of feature tokens from various perspectives. Extensive experiments showed that CT-MIFNet demonstrated the superior performance and generalization ability on the BCI Competition IV-2a, BCI Competition IV-2b, and the EEG datasets for laser-evoked pain datasets, achieving accuracies of 81.67%, 86.75%, and 83.48%, respectively. To enhance model interpretability, t-distributed stochastic neighbor embedding (t-SNE) and heatmap were employed for visualization. The code is available at https://github.com/XCZchaos/CT-MIFNet.git.}
+  title   = {{CT-MIFNet}: Convolutional transformer-based multi-view interaction and fusion network for {EEG} decoding},
+  author  = {Yibo Xiong and Jinming Li and Yun Zhuang and Xiangyue Zhao and Yilu Xu and Lilin Jie},
+  journal = {Biomedical Signal Processing and Control},
+  volume  = {112},
+  pages   = {108421},
+  year    = {2026},
+  doi     = {10.1016/j.bspc.2025.108421}
 }
 ```
 
-If you use Dataset III in your research, please cite the following paper. 😁
-```
+</details>
+
+<details>
+<summary><strong>EDLEP dataset</strong> · Zhao et al., <em>Scientific Data</em> (2025)</summary>
+
+[Read the dataset paper](https://doi.org/10.1038/s41597-025-05900-1).
+
+```bibtex
 @article{zhao2025comprehensive,
-  title={A comprehensive EEG dataset of laser-evoked potentials for pain research},
-  author={Zhao, Xiangyue and Zhou, Jingyao and Zhang, Libo and Zhuang, Yun and Duan, Haoqing and Wei, Shiyu and Yao, Suchen and Lu, Xuejing and Bi, Yanzhi and Hu, Li},
-  journal={Scientific Data},
-  volume={12},
-  number={1},
-  pages={1536},
-  year={2025},
-  publisher={Nature Publishing Group UK London}
+  title   = {A comprehensive {EEG} dataset of laser-evoked potentials for pain research},
+  author  = {Xiangyue Zhao and Jingyao Zhou and Libo Zhang and Yun Zhuang and Haoqing Duan and Shiyu Wei and Suchen Yao and Xuejing Lu and Yanzhi Bi and Li Hu},
+  journal = {Scientific Data},
+  volume  = {12},
+  number  = {1},
+  pages   = {1536},
+  year    = {2025},
+  doi     = {10.1038/s41597-025-05900-1}
 }
 ```
----
 
-## **Contact**
-For questions or issues, please open an issue or contact:
-<a href="mailto:asherxiong552@gmail.com">📧 asherxiong552@gmail.com</a>
+</details>
+
+## Acknowledgements
+
+We thank the authors of [EEG-Transformer](https://github.com/eeyhsong/EEG-Transformer) and [TFF-Former](https://github.com/lixujin1999/TFF-Former) for the code this implementation builds on.
+
+For questions about the implementation, open a [GitHub issue](https://github.com/XCZchaos/CT-MIFNet/issues) or email [asherxiong552@gmail.com](mailto:asherxiong552@gmail.com).
